@@ -8,7 +8,7 @@ button, it displays a "Loading" flag for a while and eventually times out and
 displays a message saying "Oops, something went wrong. Recent changes may not
 have been saved."
 
-![Something went wrong](./SomethingWentWrong.png)
+![Something went wrong](resources/SomethingWentWrong.png)
 
 This tool is my solution to this problem. Note that the focus is on deletion
 rather than on viewing and functions like `View` are intended only to help with
@@ -33,28 +33,28 @@ the OAuth consent screen using the steps below.
    name in the same part of the UI) and then New Project and give your new
    project a name.
 
-![Create a Project](./CreateProject.png)
-![New Project](./NewProject.png)
-![Give Name](./GiveName.png)
+![Create a Project](resources/CreateProject.png)
+![New Project](resources/NewProject.png)
+![Give Name](resources/GiveName.png)
 
 3. Click on Select a Project again and choose your project. The Gmail API page
    should pop up now. Click the Enable button.
 
-![Enable Gmail API](./EnableGmailAPI.png)
+![Enable Gmail API](resources/EnableGmailAPI.png)
 
 4. For Gmail API access, you will need OAuth credentials, so you must first set
    up the OAuth consent screen. Click on OAuth consent screen on the left and
    provide an Application Name and then click Save. Note that you do not
    actually need Google to review since only you will be using this.
 
-![OAuth consent screen](./OAuth.png)
+![OAuth consent screen](resources/OAuth.png)
 
 5. Next, click on Credentials on the left and click OAuth Client ID. Then Click
    on Create Credentials and OAuth Client ID. Then Select Other for application
    type and click Create.
 
-![Create Credentials](./CreateCredentials.png)
-![Select Other](./SelectOther.png)
+![Create Credentials](resources/CreateCredentials.png)
+![Select Other](resources/SelectOther.png)
 
 
 6. Download the JSON of the credentials by clicking on right of the credentials
