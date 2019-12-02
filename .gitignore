@@ -1,0 +1,8 @@
+# Ignore compred Python files
+*.pyc
+
+# Ignore private notes files.
+*.wiki
+
+# Ignore credentials files stored as JSON files.
+*.json
