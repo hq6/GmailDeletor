@@ -63,21 +63,16 @@ the OAuth consent screen using the steps below.
 
 ## Usage
 
-1. Start the Python interpreter in the current directory.
-```
-python
-```
-
-2. Import the library. The very first time you run this, follow the on-screen
-   instructions to get OAuth credentials. Never share your `client_secret.json`
-   or `credentials.json` file with anyone whom you do not want to grant full
-   Gmail privileges to. 
+1. Start the Python interpreter interactively in the current directory.  The
+   very first time you run this, follow the on-screen instructions to get OAuth
+   credentials. Never share your `client_secret.json` or `credentials.json`
+   file with anyone whom you do not want to grant full Gmail privileges to. 
 
 ```
-from gmail import gmail
+python -i gmail.py
 ```
 
-3. Preview the messages you wish to delete and then delete them if you have the courage.
+2. Preview the messages you wish to delete and then delete them if you have the courage.
 ```
 gmail.view("label:Linux-Kernel")
 gmail.autoDelete("label:Linux-Kernel")
