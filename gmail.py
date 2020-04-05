@@ -1,10 +1,14 @@
-"""Get a list of Messages from the user's mailbox.
+#!/usr/bin/env python
+
+"""
+Get a list of Messages from the user's mailbox.
 """
 
 from apiclient import errors
 import auth
 
 from time import sleep
+from docopt import docopt
 
 ################################################################################
 # Create a service for actual use
@@ -130,29 +134,48 @@ class Gmail:
     except errors.HttpError, error:
       print 'An error occurred: %s' % error
 
-  def trash(self, query=None, max_results = 10):
+  def trash(self, query=None, max_trashed = 10):
     """
     Move all messages matching a particular query to the trash. Note that this
     operation is reversible via the Gmail UI.
     """
-    if query:
-      messages = self.search(query, max_results)
+    def trashN(count):
+      """
+      Helper function to pace the rate at which we query for messages and then
+      trash them.
+      """
+      messages = self.search(query, count)
       for message in messages:
         self.service.users().messages().trash(userId=self.user_id,id=message["id"]).execute()
+        sleep(0.04)
+      return len(messages)
 
-  def delete(self, query=None):
+    if not query:
+      return
+
+    num_per_batch = min(max_trashed, 1000)
+    num_trashed = trashN(num_per_batch)
+    print "Just trashed %d messages" % num_trashed
+    num_total_trashed = num_trashed
+    while num_trashed > 0 and num_total_trashed < max_trashed:
+      num_trashed = trashN(num_per_batch)
+      print "Just trashed %d messages" % num_trashed
+      num_total_trashed += num_trashed
+
+  def delete(self, query=None, max_deleted = 10):
     """
     Permanently delete mesages one at a time. Based on Google's advertised
     limits, a maximum of 25 messages can be deleted per second using this
     function.
     """
     if query:
-      messages = self.search(query, 1)
+      messages = self.search(query, max_deleted)
       for message in messages:
         self.service.users().messages().delete(userId=self.user_id,id=message["id"]).execute()
+        sleep(0.04)
 
   # Fast deletion. Call at maximum 5 QPS.
-  def batchDelete(self, query=None, max_results=50):
+  def batchDelete(self, query=None, max_deleted=50):
     """
     Permanently delete max_results messages. Based on Google's advertised
     limits, this function should be called at a maximum of 5 QPS. Google
@@ -160,7 +183,7 @@ class Gmail:
     seems to work fine with max_results = 1000.
     """
     if query:
-      messages = self.search(query, max_results)
+      messages = self.search(query, max_deleted)
       if len(messages) == 0: return 0
       ids = { 'ids': [str(d['id']) for d in messages] }
       self.service.users().messages().batchDelete(userId=self.user_id,body=ids).execute()
@@ -168,19 +191,56 @@ class Gmail:
     print "No query provided. Aborting."
     return 0
 
-  def autoDelete(self, query=None, silent=False):
+  def pacedDelete(self, query=None, max_deleted=50, silent=False):
     """
-    Automatically permanently delete all email corresponding to a given query
-    at an acceptable QPS.
+    Delete up to max_deleted emails corresponding to a given query at an acceptable QPS.
     """
-    num_deleted = self.batchDelete(query, 1000)
-    while num_deleted > 0:
+    num_per_batch = min(max_deleted, 1000)
+    num_deleted = self.batchDelete(query, num_per_batch)
+    if not silent:
+      print "Just deleted %d messages" % num_deleted
+    num_total_deleted = num_deleted
+    while num_deleted > 0 and num_total_deleted < max_deleted:
+      sleep(0.5)
+      num_deleted = self.batchDelete(query, num_per_batch)
+      num_total_deleted += num_deleted
       if not silent:
         print "Just deleted %d messages" % num_deleted
-      sleep(0.5)
-      num_deleted = self.batchDelete(query, 1000)
 
 
 # This object is useable from the Python interpreter for invoking command line
 # options.
 gmail = Gmail()
+
+
+doc = r"""
+Gmail Deletion utility. The required query parameter is equivalent to a string
+that one would put in the Gmail search box.
+
+Usage: ./gmail.py [-h] [-p|-t|-d] [-c <count>] <query>
+
+    -h,--help                    show this
+    -p,--print                   output the messages that match the query. If none
+                                 of -p, -t, or -d are given, then -p is default.
+    -t,--trash                   trash the messages that match the query.
+    -d,--delete                  permanently delete the messages that match the query. Use at your own risk.
+    -c <count>,--count <count>   number of messages matching this query to delete or trash. For printing this is interpreted as the page size. [default: 10]
+"""
+def main():
+  options = docopt(doc)
+  if not (options['--trash'] or options['--delete'] or options['--print']):
+    options['--print'] = True
+
+  # Pull out options for convenience
+  query = options['<query>']
+  count = int(options['--count'])
+
+  if options['--print']:
+    gmail.view(query, count)
+  elif options['--trash']:
+    gmail.trash(query, count)
+  elif options['--delete']:
+    gmail.pacedDelete(query, count)
+
+if __name__ == "__main__":
+  main()

@@ -14,6 +14,16 @@ This tool is my solution to this problem. Note that the focus is on deletion
 rather than on viewing and functions like `View` are intended only to help with
 ensuring that one is deleting the correct set of messages.
 
+## Dependencies
+ * The Python [Google API Client](https://github.com/googleapis/google-api-python-client).
+  ```sh
+   pip install google-api-python-client
+  ```
+ * The Google [OAuth2 Client](https://github.com/googleapis/oauth2client)
+  ```sh
+  pip install --upgrade oauth2client
+  ```
+
 ## One-time Setup
 
 In order to sidestep the trust issues with me (hq6) hosting an application that has
@@ -63,19 +73,19 @@ the OAuth consent screen using the steps below.
 
 ## Usage
 
-1. Start the Python interpreter interactively in the current directory.  The
+1. Run the `gmail.py` script with the `--help` flag to see options.  The
    very first time you run this, follow the on-screen instructions to get OAuth
    credentials. Never share your `client_secret.json` or `credentials.json`
-   file with anyone whom you do not want to grant full Gmail privileges to. 
+   file with anyone whom you do not want to grant full Gmail privileges to.
 
 ```
-python -i gmail.py
+./gmail.py --help
 ```
 
 2. Preview the messages you wish to delete and then delete them if you have the courage.
 ```
-gmail.view("label:Linux-Kernel")
-gmail.autoDelete("label:Linux-Kernel")
+./gmail.py  'label:Linux-Kernel'
+./gmail.py -d -c 500 'label:Linux-Kernel'
 ```
 
 ## References
