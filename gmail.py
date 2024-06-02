@@ -243,4 +243,10 @@ def main():
     gmail.pacedDelete(query, count)
 
 if __name__ == "__main__":
+  import signal
+  import sys
+  def signal_handler(sig, frame):
+    print("")
+    sys.exit(0)
+  signal.signal(signal.SIGINT, signal_handler)
   main()
