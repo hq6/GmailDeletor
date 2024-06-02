@@ -60,7 +60,7 @@ def exchange_code(authorization_code):
   try:
     credentials = flow.step2_exchange(authorization_code)
     return credentials
-  except FlowExchangeError, error:
+  except FlowExchangeError as error:
     logging.error('An error occurred: %s', error)
     raise CodeExchangeException(None)
 
@@ -91,11 +91,11 @@ def load_or_get_credentials():
     with open("credentials.json") as cred_json:
       return oauth2client.client.Credentials.new_from_json(cred_json.read())
   except Exception as e:
-    print e
-    email = raw_input("No credentials.json found. Please enter your email address: ").strip()
-    print "Please visit the following URL and paste one-time code here"
-    print get_authorization_url(email)
-    auth_code = raw_input("Authorization Code: ").strip()
+    print(e)
+    email = input("No credentials.json found. Please enter your email address: ").strip()
+    print("Please visit the following URL and paste one-time code here")
+    print(get_authorization_url(email))
+    auth_code = input("Authorization Code: ").strip()
     credentials = exchange_code(auth_code)
 
     # Save the credentials

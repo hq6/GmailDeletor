@@ -78,8 +78,8 @@ class Gmail:
         messages.extend(response['messages'])
 
       return messages
-    except errors.HttpError, error:
-      print 'An error occurred: %s' % error
+    except errors.HttpError as error:
+      print('An error occurred: %s' % error)
 
   def get(self, message_id, format = 'full'):
     """
@@ -108,31 +108,31 @@ class Gmail:
         headers = message["payload"]["headers"]
         for h in headers:
           if h["name"] == "Subject":
-            print "Subject: " + h["value"]
+            print("Subject: " + h["value"])
             break
-        print message["snippet"] + "\n"
+        print(message["snippet"] + "\n")
 
     try:
       response = self.service.users().messages().list(userId=self.user_id,
                                                  q=query, maxResults=results_per_page).execute()
       if 'messages' not in response:
-        print "No messages matched the query"
+        print("No messages matched the query")
         return
 
       # Display estimate and first set of messages.
-      print "Gmail estimates that %d messages matched the given query." % response["resultSizeEstimate"]
+      print("Gmail estimates that %d messages matched the given query." % response["resultSizeEstimate"])
       displayMessages(response['messages'])
 
       while 'nextPageToken' in response:
         page_token = response['nextPageToken']
-        if raw_input("Press Enter to view the next page of results, type S to stop: ") == "S":
+        if input("Press Enter to view the next page of results, type S to stop: ") == "S":
           return
         response = self.service.users().messages().list(userId=self.user_id, q=query,
                                            pageToken=page_token, maxResults=results_per_page).execute()
         displayMessages(response['messages'])
 
-    except errors.HttpError, error:
-      print 'An error occurred: %s' % error
+    except errors.HttpError as error:
+      print('An error occurred: %s' % error)
 
   def trash(self, query=None, max_trashed = 10):
     """
@@ -155,11 +155,11 @@ class Gmail:
 
     num_per_batch = min(max_trashed, 1000)
     num_trashed = trashN(num_per_batch)
-    print "Just trashed %d messages" % num_trashed
+    print("Just trashed %d messages" % num_trashed)
     num_total_trashed = num_trashed
     while num_trashed > 0 and num_total_trashed < max_trashed:
       num_trashed = trashN(num_per_batch)
-      print "Just trashed %d messages" % num_trashed
+      print("Just trashed %d messages" % num_trashed)
       num_total_trashed += num_trashed
 
   def delete(self, query=None, max_deleted = 10):
@@ -188,7 +188,7 @@ class Gmail:
       ids = { 'ids': [str(d['id']) for d in messages] }
       self.service.users().messages().batchDelete(userId=self.user_id,body=ids).execute()
       return len(messages)
-    print "No query provided. Aborting."
+    print("No query provided. Aborting.")
     return 0
 
   def pacedDelete(self, query=None, max_deleted=50, silent=False):
@@ -198,14 +198,14 @@ class Gmail:
     num_per_batch = min(max_deleted, 1000)
     num_deleted = self.batchDelete(query, num_per_batch)
     if not silent:
-      print "Just deleted %d messages" % num_deleted
+      print("Just deleted %d messages" % num_deleted)
     num_total_deleted = num_deleted
     while num_deleted > 0 and num_total_deleted < max_deleted:
       sleep(0.5)
       num_deleted = self.batchDelete(query, num_per_batch)
       num_total_deleted += num_deleted
       if not silent:
-        print "Just deleted %d messages" % num_deleted
+        print("Just deleted %d messages" % num_deleted)
 
 
 # This object is useable from the Python interpreter for invoking command line
